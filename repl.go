@@ -5,16 +5,21 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/zsoltdzsugan/pokedexcli/internal/pokeapi"
 )
 
 type config struct {
-	commands map[string]cliCommand
+	commands         map[string]cliCommand
+	pokeapiClient    pokeapi.Client
+	nextLocationsURL *string
+	prevLocationsURL *string
 }
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*config) error
+	callback    func(*config, string) error
 }
 
 func startREPL(cfg *config) {
@@ -30,12 +35,16 @@ func startREPL(cfg *config) {
 		}
 
 		commandName := input[0]
+		var commandArg string
+		if len(input) > 1 {
+			commandArg = input[1]
+		}
 		command, exists := cfg.commands[commandName]
 		if !exists {
 			fmt.Println("Unknown command")
 			continue
 		}
-		if err := command.callback(cfg); err != nil {
+		if err := command.callback(cfg, commandArg); err != nil {
 			fmt.Println(err)
 			continue
 		}
@@ -57,6 +66,21 @@ func getCommands() map[string]cliCommand {
 			name:        "exit",
 			description: "Exit the Pokedex",
 			callback:    commandExit,
+		},
+		"map": {
+			name:        "map",
+			description: "Get the next page of locations",
+			callback:    commandMap,
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Get the previous page of locations",
+			callback:    commandMapb,
+		},
+		"explore": {
+			name:        "explore",
+			description: "Show found pokemon in that area",
+			callback:    commandExplore,
 		},
 	}
 }
