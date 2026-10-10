@@ -40,7 +40,7 @@ func startREPL(cfg *config) {
 		if len(input) > 1 {
 			args = input[1:]
 		}
-		command, exists := cfg.commands[commandName]
+		command, exists := getCommands()[commandName]
 		if !exists {
 			fmt.Println("Unknown command")
 			continue
@@ -92,6 +92,11 @@ func getCommands() map[string]cliCommand {
 			name:        "inspect",
 			description: "Inspect a caught pokemon",
 			callback:    commandInspect,
+		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "See all the pokemon you've caught",
+			callback:    commandPokedex,
 		},
 	}
 }
